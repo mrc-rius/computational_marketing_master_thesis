@@ -1,0 +1,61 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TFM Survey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'surveys/style.css' %}" />
+    <link href="{{ STATIC_URL }}/static/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
+    <link href="{{ STATIC_URL }}/static/bootstrap/js/bootstrap.js" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="../../assets/js/html5shiv.js"></script>
+      <script src="../../assets/js/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+    <form action="{% url 'surveys:vote' %}" method="post">
+        {% csrf_token %}
+        {% if questions %}
+        <ul class="list-group">
+        {% for question in questions %}
+            <li class="list-group-item list-group-item">
+                <div class="question-div">
+                    <p class="h5">{{ question.question_text}}</p>
+                </div>
+            {% if question.choice_set.all %}
+                <div id="container">
+                <div id="sub-container">
+                    {% for choice in question.choice_set.all %}
+
+                            <div class="form-check form-check-inline button-aggregation">
+                                <input class="form-check-input" type="radio" name="{{ question.id }}" id="choice{{ forloop.counter }}" value="{{ choice.choice_text }}" required>
+                                <label class="form-check-label label-format" for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label>
+                            </div>
+                    {% endfor %}
+                </div>
+                </div>
+            {% else %}
+                <div id="container-text-input">
+                <div id="sub-container-text-input">
+                <div class="form-check form-check-inline text-input">
+                    <input type="text" class="form-control" placeholder="Type some answer..." name="{{ question.id }}" required/>
+                </div>
+                </div>
+                </div>
+            {% endif %}
+            </li>
+        {% endfor %}
+        {% else %}
+            <p>No questions are available.</p>
+        {% endif %}
+        <input type="submit" class="btn btn-primary form-btn" value="Votar" />
+        </ul>
+    </form>
+</div>
+</body>
+</html>

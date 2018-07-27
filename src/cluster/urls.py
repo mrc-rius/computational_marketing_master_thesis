@@ -3,5 +3,6 @@ from . import views
 
 app_name = 'cluster'
 urlpatterns = [
-    path('', views.ClusterIndex, name='clusterIndex'),
+    path('', views.ClusterCreation, name='clusterCreation'),
+    path('clusterPrediction/', views.ClusterPrediction, name='clusterPrediction'),
 ]

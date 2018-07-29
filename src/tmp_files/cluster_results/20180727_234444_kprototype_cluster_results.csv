@@ -1,9 +1,0 @@
-"Concept";"Value";"Concept description"
-"Cluster centroids";"[array([[  5.        ,  16.        ],
-       [  1.33333333,   4.66666667]]), array([['fdfd'],
-       ['a']],
-      dtype='<U4')]";"Categories of cluster centroids"
-"Cluster computing cost";"18.0087343856";"Clustering cost, defined as the sum distance of all points to their respective cluster centroids."
-"Cluster iterations";"2";"The number of iterations the algorithm ran for"
-"Points labels";"[1 1 1 0]";"Labels of each point"
-"Cluster iterations";"2.33770052616";"The (potentially calculated) weighing factor."

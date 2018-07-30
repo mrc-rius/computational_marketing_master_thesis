@@ -14,11 +14,21 @@ from django.db import connection
 kproto = 0 # variable with the cluster object if it has been computed
 
 
-#Get real data from database
-def my_clustering_data():
+#Get real data with a flag of training_data as TRUE: This data is useful to set the clusters
+def get_training_data():
     with connection.cursor() as cursor:
         #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
-        cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
+        cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where training_set=1 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
+        row = cursor.fetchall()
+    return row
+
+
+#Get real data with a flag of training_data as FALSE: This data should be predicted
+#This is expected to run as a batch procedure every X minutes
+def get_data_to_predict():
+    with connection.cursor() as cursor:
+        #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
+        cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where training_set=0 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
         row = cursor.fetchall()
     return row
 
@@ -55,7 +65,36 @@ def clusterStatisticsCSV(kproto):
                                                 cluster_centroids[1][0][23],
                                                 cluster_centroids[1][0][24],
                                                 cluster_centroids[1][0][25],
-                                                ])
+                                                ]),
+                                        np.array([
+                                                cluster_centroids[0][1][0],
+                                                cluster_centroids[1][1][0],
+                                                cluster_centroids[1][1][1],
+                                                cluster_centroids[1][1][2],
+                                                cluster_centroids[1][1][3],
+                                                cluster_centroids[1][1][4],
+                                                cluster_centroids[1][1][5],
+                                                cluster_centroids[1][1][6],
+                                                cluster_centroids[1][1][7],
+                                                cluster_centroids[1][1][8],
+                                                cluster_centroids[1][1][9],
+                                                cluster_centroids[1][1][10],
+                                                cluster_centroids[1][1][11],
+                                                cluster_centroids[1][1][12],
+                                                cluster_centroids[1][1][13],
+                                                cluster_centroids[1][1][14],
+                                                cluster_centroids[1][1][15],
+                                                cluster_centroids[1][1][16],
+                                                cluster_centroids[1][1][17],
+                                                cluster_centroids[1][1][18],
+                                                cluster_centroids[1][1][19],
+                                                cluster_centroids[1][1][20],
+                                                cluster_centroids[1][1][21],
+                                                cluster_centroids[1][1][22],
+                                                cluster_centroids[1][1][23],
+                                                cluster_centroids[1][1][24],
+                                                cluster_centroids[1][1][25],
+                                            ]),
                                         ])
         #np.array([
                 #  np.array([
@@ -104,7 +143,7 @@ def ClusterCreation(request,*args):
             return
     '''
     # Get data from database
-    rows=my_clustering_data()
+    rows=get_training_data()
     # Cast as numpy Array
     rows_array=np.array(rows)
     #Split data into variables and id's
@@ -129,9 +168,25 @@ def ClusterPrediction(request):
     if (kproto==0):
         ClusterCreation(None,1)
 
+    # Get data from database
+    rows = get_data_to_predict()
+
+    if not rows:
+        return HttpResponse('No hay clientes para predecir.')
+    # Cast as numpy Array
+    rows_array = np.array(rows)
+    # Split data into variables and id's
+    data_array = np.array(rows_array)[:, 1:]  # dejamos sólo las variables que pueden clusterizar el cliente
+    ids_array = np.array(rows_array)[:, 0]  # guardamos las id's en otro array
+
+    # Example of clustering fit prediction with random data
+    '''
     # random point to fit
     data = np.array([[0, 'a', 3]])
     fit_label = kproto.predict(data, categorical=[1]) #categorical is the Index of columns that contain categorical data
+    '''
+    #Cluster prediction
+    fit_label = kproto.predict(data_array,categorical=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26])  # categorical is the Index of columns that contain categorical data
     # Print the cluster centroids
     return HttpResponse('Usted pertenece al cluster '+str(fit_label))
 

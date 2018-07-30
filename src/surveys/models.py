@@ -30,5 +30,6 @@ class Answer(models.Model):
     answer_text=models.CharField(max_length=200)
     insert_timestamp=models.DateTimeField(auto_now_add=True, blank=True)
     form_token=models.CharField(max_length=200)
+    training_set=models.IntegerField(default=0)
     def __str__(self):
         return self.answer_text

@@ -1,6 +1,0 @@
-"Concept";"Value";"Concept description"
-"Cluster centroids";"8340000.0";"Categories of cluster centroids"
-"Cluster computing cost";"1.68665601184e+12";"Clustering cost, defined as the sum distance of all points to their respective cluster centroids."
-"Cluster iterations";"2";"The number of iterations the algorithm ran for"
-"Points labels";"[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0]";"Labels of each point"
-"Gamma";"1007141.68019";"The (potentially calculated) weightting factor. Gamma relates the categorical cost to the numerical cost"

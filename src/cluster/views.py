@@ -6,6 +6,7 @@ import datetime
 from kmodes.kprototypes import KPrototypes
 from kmodes.kmodes import KModes
 from django.http import HttpResponse
+import datetime
 from pathlib import Path
 from django.db import connection
 
@@ -18,7 +19,8 @@ kproto = 0 # variable with the cluster object if it has been computed
 def get_training_data():
     with connection.cursor() as cursor:
         #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
-        cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where training_set=1 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
+        #cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where training_set=1 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
+        cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where question_id in (1,2,3,7,8) and training_set=1 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question7 varchar(200),question8 varchar(200))")
         row = cursor.fetchall()
     return row
 
@@ -28,9 +30,27 @@ def get_training_data():
 def get_data_to_predict():
     with connection.cursor() as cursor:
         #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
-        cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where training_set=0 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
+        #cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where training_set=0 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
+        cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where question_id in (1,2,3,7,8) and training_set=0 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question7 varchar(200),question8 varchar(200))")
         row = cursor.fetchall()
     return row
+
+#Inser the cluster label for each point predicted
+def insert_cluster(cluster_label,tariff,customer_type,power,consumption,product_type):
+    with connection.cursor() as cursor:
+        #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
+        cursor.execute("INSERT INTO cluster_centroids(cluster_label,tariff,customer_type,power,consumption,product_type,cluster_date) VALUES(%s,%s,%s,%s,%s,%s,%s)",(cluster_label,tariff,customer_type,power,consumption,product_type,datetime.datetime.now()))
+    return 1;
+
+#Inser the cluster label for each point predicted
+def insert_predicted_data(ids_array,data_array,fit_label):
+    loop_counter=0
+    for id in ids_array:
+        with connection.cursor() as cursor:
+            #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
+            cursor.execute("INSERT INTO cluster_prediction(form_id,prediction_date,cluster_label) VALUES(%s,%s,%s)",(id,datetime.datetime.now(),int(fit_label[loop_counter])))
+            loop_counter+=1
+    return 1;
 
 # Gets a cluster and extract all properties to create a CSV report.
 def clusterStatisticsCSV(kproto):
@@ -43,28 +63,6 @@ def clusterStatisticsCSV(kproto):
                                                 cluster_centroids[1][0][1],
                                                 cluster_centroids[1][0][2],
                                                 cluster_centroids[1][0][3],
-                                                cluster_centroids[1][0][4],
-                                                cluster_centroids[1][0][5],
-                                                cluster_centroids[1][0][6],
-                                                cluster_centroids[1][0][7],
-                                                cluster_centroids[1][0][8],
-                                                cluster_centroids[1][0][9],
-                                                cluster_centroids[1][0][10],
-                                                cluster_centroids[1][0][11],
-                                                cluster_centroids[1][0][12],
-                                                cluster_centroids[1][0][13],
-                                                cluster_centroids[1][0][14],
-                                                cluster_centroids[1][0][15],
-                                                cluster_centroids[1][0][16],
-                                                cluster_centroids[1][0][17],
-                                                cluster_centroids[1][0][18],
-                                                cluster_centroids[1][0][19],
-                                                cluster_centroids[1][0][20],
-                                                cluster_centroids[1][0][21],
-                                                cluster_centroids[1][0][22],
-                                                cluster_centroids[1][0][23],
-                                                cluster_centroids[1][0][24],
-                                                cluster_centroids[1][0][25],
                                                 ]),
                                         np.array([
                                                 cluster_centroids[0][1][0],
@@ -72,30 +70,40 @@ def clusterStatisticsCSV(kproto):
                                                 cluster_centroids[1][1][1],
                                                 cluster_centroids[1][1][2],
                                                 cluster_centroids[1][1][3],
-                                                cluster_centroids[1][1][4],
-                                                cluster_centroids[1][1][5],
-                                                cluster_centroids[1][1][6],
-                                                cluster_centroids[1][1][7],
-                                                cluster_centroids[1][1][8],
-                                                cluster_centroids[1][1][9],
-                                                cluster_centroids[1][1][10],
-                                                cluster_centroids[1][1][11],
-                                                cluster_centroids[1][1][12],
-                                                cluster_centroids[1][1][13],
-                                                cluster_centroids[1][1][14],
-                                                cluster_centroids[1][1][15],
-                                                cluster_centroids[1][1][16],
-                                                cluster_centroids[1][1][17],
-                                                cluster_centroids[1][1][18],
-                                                cluster_centroids[1][1][19],
-                                                cluster_centroids[1][1][20],
-                                                cluster_centroids[1][1][21],
-                                                cluster_centroids[1][1][22],
-                                                cluster_centroids[1][1][23],
-                                                cluster_centroids[1][1][24],
-                                                cluster_centroids[1][1][25],
                                             ]),
+                                        np.array([
+                                                cluster_centroids[0][2][0],
+                                                cluster_centroids[1][2][0],
+                                                cluster_centroids[1][2][1],
+                                                cluster_centroids[1][2][2],
+                                                cluster_centroids[1][2][3],
+                                        ]),
                                         ])
+    #Save cluster 1, A.K.A product 1
+    cluster_label=0
+    consumption = int(cluster_centroids[0][0][0])
+    power=cluster_centroids[1][0][0],
+    product_type = cluster_centroids[1][0][1]
+    customer_type = cluster_centroids[1][0][2],
+    tariff = cluster_centroids[1][0][3]
+    insert_cluster(cluster_label, tariff, customer_type, power, consumption, product_type)
+    # Save cluster 2, A.K.A product 2
+    cluster_label = 0
+    consumption = int(cluster_centroids[0][1][0])
+    power = cluster_centroids[1][1][0],
+    product_type = cluster_centroids[1][1][1]
+    customer_type = cluster_centroids[1][1][2],
+    tariff = cluster_centroids[1][1][3]
+    insert_cluster(cluster_label, tariff, customer_type, power, consumption, product_type)
+    # Save cluster 3, A.K.A product 3
+    cluster_label = 0
+    consumption = int(cluster_centroids[0][2][0])
+    power = cluster_centroids[1][2][0],
+    product_type = cluster_centroids[1][2][1]
+    customer_type = cluster_centroids[1][2][2],
+    tariff = cluster_centroids[1][2][3]
+    insert_cluster(cluster_label, tariff, customer_type, power, consumption, product_type)
+
         #np.array([
                 #  np.array([
     #                       cluster_centroids[0][0][0],
@@ -151,8 +159,9 @@ def ClusterCreation(request,*args):
     ids_array = np.array(rows_array)[:, 0] #guardamos las id's en otro array
 
     #Clustering
-    kproto = KPrototypes(n_clusters=2, init='Cao', verbose=2)
-    clusters = kproto.fit(data_array, categorical=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26])
+    kproto = KPrototypes(n_clusters=3, init='Cao', verbose=2)
+    #clusters = kproto.fit(data_array, categorical=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26])
+    clusters = kproto.fit(data_array,categorical=[1, 2, 3, 4])
     # Create CSV with cluster statistics
     clusterStatisticsCSV(kproto)
     for argument in args:
@@ -186,9 +195,11 @@ def ClusterPrediction(request):
     fit_label = kproto.predict(data, categorical=[1]) #categorical is the Index of columns that contain categorical data
     '''
     #Cluster prediction
-    fit_label = kproto.predict(data_array,categorical=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26])  # categorical is the Index of columns that contain categorical data
-    # Print the cluster centroids
-    return HttpResponse('Usted pertenece al cluster '+str(fit_label))
+    #fit_label = kproto.predict(data_array,categorical=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26])  # categorical is the Index of columns that contain categorical data
+    fit_label = kproto.predict(data_array,categorical=[1, 2, 3, 4])  # categorical is the Index of columns that contain categorical data
+    # Sava prediction into table
+    insert_predicted_data(ids_array,data_array,fit_label)
+    return HttpResponse('Predicción de clientes pendientes realizada.')
 
 # Function with kmodes (non-categorical) to use in further developments and to understand better clustering properties
 

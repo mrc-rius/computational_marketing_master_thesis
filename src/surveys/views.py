@@ -48,8 +48,8 @@ def vote (request):
                 return render(request, 'surveys/detail.html', {
                     'error_message': "We have detected some error related with saving your answers.",
                 })
-    #return HttpResponseRedirect(reverse('surveys:successVote'))
-    return HttpResponseRedirect(reverse('cluster:ClusterPrediction'))
+    return HttpResponseRedirect(reverse('surveys:successVote'))
+
     '''
     question = get_object_or_404(Question)
     try:

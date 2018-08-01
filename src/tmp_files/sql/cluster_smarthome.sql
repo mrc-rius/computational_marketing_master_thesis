@@ -1,0 +1,4 @@
+select * from cluster_smarthome;
+INSERT INTO cluster_smarthome(smarthome_name, smarthome_min_price,smarthome_max_price, smarthome_tariff, smarthome_customer_type, deleted) VALUES ('Smarthome Domestico',1000,10000,'2.X','Domestico',0);
+INSERT INTO cluster_smarthome(smarthome_name, smarthome_min_price,smarthome_max_price, smarthome_tariff, smarthome_customer_type, deleted) VALUES ('Smarthome PYME',10000,30000,'3.X','Empresa',0);
+INSERT INTO cluster_smarthome(smarthome_name, smarthome_min_price,smarthome_max_price, smarthome_tariff, smarthome_customer_type, deleted) VALUES ('Smarthome Gran empresa',20000,50000,'6.X','Empresa',0);

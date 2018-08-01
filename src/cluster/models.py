@@ -38,9 +38,12 @@ class Battery(models.Model):
 
 class Vehicle(models.Model):
     vehicle_name=models.CharField(max_length=200)
-    vehicle_price=models.DecimalField(decimal_places=2,max_digits=10)
+    vehicle_min_price=models.DecimalField(decimal_places=2,max_digits=10,default=0)
+    vehicle_max_price = models.DecimalField(decimal_places=2, max_digits=10,default=0)
     vehicle_tariff=models.CharField(max_length=15)
-    vehicle_power = models.IntegerField()
+    vehicle_min_power = models.IntegerField(default=0)
+    vehicle_max_power = models.IntegerField(default=0)
+    vehicle_power_unit = models.CharField(max_length=5,default='KW')
     deleted=models.IntegerField(default=0)
 
 class Manager(models.Model):
@@ -52,7 +55,8 @@ class Manager(models.Model):
 
 class Smarthome(models.Model):
     smarthome_name=models.CharField(max_length=200)
-    smarthome_price=models.DecimalField(decimal_places=2,max_digits=10)
+    smarthome_min_price=models.DecimalField(decimal_places=2,max_digits=10,default=0)
+    smarthome_max_price = models.DecimalField(decimal_places=2, max_digits=10,default=0)
     smarthome_tariff=models.CharField(max_length=15)
     smarthome_customer_type = models.CharField(max_length=200)
     deleted=models.IntegerField(default=0)
@@ -62,3 +66,12 @@ class Financing(models.Model):
     financing_monthly_interest = models.DecimalField(decimal_places=2,max_digits=10)
     financing_month_duration = models.IntegerField()
     deleted = models.IntegerField(default=0)
+
+class Costs(models.Model):
+    cost_name=models.CharField(max_length=200)
+    cost_description = models.CharField(max_length=200)
+    cost_unit = models.CharField(max_length=200)
+    cost_avg=models.DecimalField(decimal_places=2,max_digits=10)
+    cost_dsv=models.DecimalField(decimal_places=2,max_digits=10)
+    cost_var=models.DecimalField(decimal_places=2,max_digits=10)
+    deleted=models.IntegerField(default=0)

@@ -71,7 +71,10 @@ class Costs(models.Model):
     cost_name=models.CharField(max_length=200)
     cost_description = models.CharField(max_length=200)
     cost_unit = models.CharField(max_length=200)
+    cost_tariff = models.CharField(max_length=10,blank=True, null=True)
     cost_avg=models.DecimalField(decimal_places=2,max_digits=10)
     cost_dsv=models.DecimalField(decimal_places=2,max_digits=10)
     cost_var=models.DecimalField(decimal_places=2,max_digits=10)
     deleted=models.IntegerField(default=0)
+
+

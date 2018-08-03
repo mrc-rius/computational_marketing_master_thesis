@@ -33,3 +33,9 @@ class Answer(models.Model):
     training_set=models.IntegerField(default=0)
     def __str__(self):
         return self.answer_text
+
+class Translate_Hired_Power(models.Model):
+    hired_power_literal = models.CharField(max_length=200)
+    min_hired_power = models.IntegerField(default=0)
+    max_hired_power = models.IntegerField(default=800)
+    deleted = models.IntegerField(default=0)

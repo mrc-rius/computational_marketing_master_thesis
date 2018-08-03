@@ -15,6 +15,7 @@ from django.db import connection
 kproto = 0 # variable with the cluster object if it has been computed
 
 
+
 #Get real data with a flag of training_data as TRUE: This data is useful to set the clusters
 def get_training_data():
     with connection.cursor() as cursor:
@@ -51,6 +52,41 @@ def insert_predicted_data(ids_array,data_array,fit_label):
             cursor.execute("INSERT INTO cluster_prediction(form_id,prediction_date,cluster_label) VALUES(%s,%s,%s)",(id,datetime.datetime.now(),int(fit_label[loop_counter])))
             loop_counter+=1
     return 1;
+
+def get_power_term_cost_data(tariff):
+    with connection.cursor() as cursor:
+        cursor.execute("select (cost_avg+random()*(cost_var-(-cost_var))) tp_cost from cluster_costs where cost_description='TP*potencia_contratada' and cost_tariff=%s", [tariff])
+        #(str(tariff))
+        row = cursor.fetchall()
+    return row
+
+def get_hired_power_translate(power):
+    with connection.cursor() as cursor:
+        cursor.execute("select random()*(max_hired_power-min_hired_power)+min_hired_power as random_hired_power from surveys_Translate_Hired_Power where hired_power_literal='Menor de 10 kW'", [power])
+        #(str(tariff))
+        row = cursor.fetchall()
+    return row
+
+#Returns the "power term" cost
+#Params: Tariff: Electric tariff;Power: Hired power
+def power_term_cost(tariff,power):
+    cost=get_power_term_cost_data(tariff)
+    random_hired_power=get_hired_power_translate(power)
+    ptc=cost*random_hired_power
+    return ptc
+
+def get_green_energy_cost_data():
+    with connection.cursor() as cursor:
+        cursor.execute("select cost_avg from cluster_costs where cluster_costs.cost_name ='Coste energia verde'", [power])
+        #(str(tariff))
+        row = cursor.fetchall()
+    return row
+
+#Returns the "green energy" cost
+#Params: None
+def green_energy_cost():
+    gec=get_green_energy_cost_data()
+    return gec
 
 # Gets a cluster and extract all properties to create a CSV report.
 def clusterStatisticsCSV(kproto):
@@ -128,7 +164,6 @@ def clusterStatisticsCSV(kproto):
         filewriter.writerow(['Gamma', kproto.gamma, 'The (potentially calculated) weightting factor. Gamma relates the categorical cost to the numerical cost'])
 
 # This function creates kprototype clusters using the current data at database
-
 def ClusterCreation(request,*args):
     global kproto
 

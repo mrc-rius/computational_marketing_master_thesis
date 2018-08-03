@@ -62,7 +62,7 @@ def get_power_term_cost_data(tariff):
 
 def get_hired_power_translate(power):
     with connection.cursor() as cursor:
-        cursor.execute("select random()*(max_hired_power-min_hired_power)+min_hired_power as random_hired_power from surveys_Translate_Hired_Power where hired_power_literal='Menor de 10 kW'", [power])
+        cursor.execute("select random()*(max_hired_power-min_hired_power)+min_hired_power as random_hired_power from surveys_Translate_Hired_Power where hired_power_literal=%s", [power])
         #(str(tariff))
         row = cursor.fetchall()
     return row
@@ -87,6 +87,97 @@ def get_green_energy_cost_data():
 def green_energy_cost():
     gec=get_green_energy_cost_data()
     return gec
+
+
+def get_funding_data(funding_duration):
+    with connection.cursor() as cursor:
+        cursor.execute("select financing_monthly_interest from cluster_financing where financing_month_duration=%d", [funding_duration])
+        row = cursor.fetchall()
+    return row
+
+#Returns the monthly fee based on funding conditions
+#Params: funding_duration: months of the funding, value to fund
+def get_funding(funding_duration,funding_value):
+    interest=get_funding_data(funding_duration)
+    total_funding_payment=funding_value*((interest/100)+1)
+    monthly_funding_fee=total_funding_payment/funding_duration
+    return monthly_funding_fee
+
+def get_battery_data(customer_type,tariff):
+    with connection.cursor() as cursor:
+        cursor.execute("select battery_price from cluster_battery where battery_customer_type=%s and battery_tariff=%s",([customer_type], [tariff]))
+        row = cursor.fetchall()
+    return row
+
+def batery_cost(customer_type,tariff,funding_duration):
+    battery_total_price=get_battery_data(customer_type,tariff)
+    batery_monthly_funding_fee=get_funding(funding_duration,battery_total_price)
+    return batery_monthly_funding_fee
+
+def get_smarthome_data(customer_type,tariff):
+    with connection.cursor() as cursor:
+        cursor.execute("select random()*(smarthome_max_price-smarthome_min_price) from cluster_smarthome where smarthome_customer_type=%s and smarthome_tariff=%s",([customer_type], [tariff]))
+        row = cursor.fetchall()
+    return row
+
+def smarthome_cost(customer_type,tariff,funding_duration):
+    smarthome_total_price=get_smarthome_data(customer_type,tariff)
+    smarthome_monthly_funding_fee=get_funding(funding_duration,smarthome_total_price)
+    return smarthome_monthly_funding_fee
+
+
+def get_vehicle_data(power,tariff):
+    with connection.cursor() as cursor:
+        cursor.execute("select case when %d < vehicle_min_power then 0 when %d BETWEEN  vehicle_min_power and vehicle_max_power then 1*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price when %d > vehicle_max_power then round((%d::FLOAT/vehicle_max_power::FLOAT)::INTEGER,2)*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price end from cluster_vehicle where vehicle_tariff=%s",([power], [tariff]))
+        row = cursor.fetchall()
+    return row
+
+def vehicle_cost(power,tariff,funding_duration):
+    vehicle_total_price=get_vehicle_data(power,tariff)
+    vehicle_monthly_funding_fee=get_funding(funding_duration,vehicle_total_price)
+    return vehicle_monthly_funding_fee
+
+def get_manager_data(tariff,customer_type):
+    with connection.cursor() as cursor:
+        cursor.execute("select manager_price from cluster_manager WHERE manager_tariff=%s and manager_customer_type=%s",([tariff], [customer_type]))
+        row = cursor.fetchall()
+    return row
+
+#Returns the "manager_cost" cost
+#Params: None
+def manager_cost(tariff,customer_type):
+    mc=get_manager_data(tariff,customer_type)
+    return mc
+
+def get_maintenance_data(tariff,customer_type):
+    with connection.cursor() as cursor:
+        cursor.execute("select maintenance_price from cluster_maintenance where maintenance_tariff=%s and maintenance_customer_type=%s",([tariff], [customer_type]))
+        row = cursor.fetchall()
+    return row
+
+#Returns the "maintenance_cost" cost
+#Params: None
+def maintenance_cost(tariff,customer_type):
+    maintenance_c=get_maintenance_data(tariff,customer_type)
+    return maintenance_c
+
+def get_insurance_data(tariff,customer_type):
+    with connection.cursor() as cursor:
+        cursor.execute("select insurance_price from cluster_insurance where insurance_tariff=%s and insurance_customer_type=%s",([tariff], [customer_type]))
+        row = cursor.fetchall()
+    return row
+
+#Returns the "insurance_cost" cost
+#Params: None
+def insurance_cost(tariff,customer_type):
+    ic=get_insurance_data(tariff,customer_type)
+    return ic
+
+#Returns the "maintenance_cost" cost
+#Params: None
+def maintenance_cost(tariff,customer_type):
+    maintenance_c=get_maintenance_data(tariff,customer_type)
+    return maintenance_c
 
 # Gets a cluster and extract all properties to create a CSV report.
 def clusterStatisticsCSV(kproto):

@@ -1,4 +1,11 @@
 select * from cluster_vehicle;
-INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga lenta indoor',900,1500,'2.X',3,7,'KW',0);
-INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga rapida outdoor',3000,10000,'3.X',20,0,'KW',0);
-INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga rapida',30000,100000,'6.X',0,0,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga lenta indoor',900,1500,'2.0 A',3,7,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga lenta indoor',900,1500,'2.1 A',3,7,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga lenta indoor',900,1500,'2.0 DHA',3,7,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga lenta indoor',900,1500,'2.1 DHA',3,7,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga lenta indoor',900,1500,'2.0 DHS',3,7,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga lenta indoor',900,1500,'2.1 DHS',3,7,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga rapida outdoor',3000,10000,'3.0 A',20,0,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga rapida outdoor',3000,10000,'3.1 A',20,0,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga rapida',30000,100000,'6.1 A',0,0,'KW',0);
+INSERT INTO cluster_vehicle(vehicle_name, vehicle_min_price,vehicle_max_price, vehicle_tariff, vehicle_min_power,vehicle_max_power,vehicle_power_unit, deleted) VALUES ('Carga rapida',30000,100000,'X',0,0,'KW',0);

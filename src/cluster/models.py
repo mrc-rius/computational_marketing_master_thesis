@@ -21,12 +21,16 @@ class Maintenance(models.Model):
     maintenance_name=models.CharField(max_length=200)
     maintenance_price=models.DecimalField(decimal_places=2,max_digits=10)
     maintenance_level=models.IntegerField()
+    maintenance_tariff = models.CharField(max_length=15, default="")
+    maintenance_customer_type = models.CharField(max_length=200, default="")
     deleted=models.IntegerField(default=0)
 
 class Insurance(models.Model):
     insurance_name=models.CharField(max_length=200)
     insurance_price=models.DecimalField(decimal_places=2,max_digits=10)
     insurance_level=models.IntegerField()
+    insurance_tariff = models.CharField(max_length=15,default="")
+    insurance_customer_type = models.CharField(max_length=200,default="")
     deleted=models.IntegerField(default=0)
 
 class Battery(models.Model):

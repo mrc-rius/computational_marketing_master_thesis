@@ -39,3 +39,9 @@ class Translate_Hired_Power(models.Model):
     min_hired_power = models.IntegerField(default=0)
     max_hired_power = models.IntegerField(default=800)
     deleted = models.IntegerField(default=0)
+
+class Translate_Interest(models.Model):
+    interest_value = models.CharField(max_length=2)
+    min_interest = models.DecimalField(max_digits=2,decimal_places=2)
+    max_interest = models.DecimalField(max_digits=2,decimal_places=2)
+    deleted = models.IntegerField(default=0)

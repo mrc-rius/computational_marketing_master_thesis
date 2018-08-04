@@ -53,16 +53,30 @@ def insert_predicted_data(ids_array,data_array,fit_label):
             loop_counter+=1
     return 1;
 
-def get_power_term_cost_data(tariff):
+#Returns a random value in the range of hired power the customer has chosen.
+#Params:
+    # Power: String with the hired power range
+def get_hired_power_translate(power):
     with connection.cursor() as cursor:
-        cursor.execute("select (cost_avg+random()*(cost_var-(-cost_var))) tp_cost from cluster_costs where cost_description='TP*potencia_contratada' and cost_tariff=%s", [tariff])
+        cursor.execute("select random()*(max_hired_power-min_hired_power)+min_hired_power as random_hired_power from surveys_Translate_Hired_Power where hired_power_literal=%s", [power])
         #(str(tariff))
         row = cursor.fetchall()
     return row
 
-def get_hired_power_translate(power):
+#Returns a random value in the range of maximum and minimum interest that is evaluated the customer answer for any question related with
+# HOW INTERESTED ARE YOU AT...
+#Params:
+    # interest: String with a number (first position of original string)
+def get_interest_translate(interest):
     with connection.cursor() as cursor:
-        cursor.execute("select random()*(max_hired_power-min_hired_power)+min_hired_power as random_hired_power from surveys_Translate_Hired_Power where hired_power_literal=%s", [power])
+        cursor.execute("select random()*(max_interest-min_interest)+min_interest as rand_interest from surveys_Translate_Interest where interest_value=%s", [interest])
+        #(str(tariff))
+        row = cursor.fetchall()
+    return row
+
+def get_power_term_cost_data(tariff):
+    with connection.cursor() as cursor:
+        cursor.execute("select (cost_avg+(random()*cost_var-(-cost_var))+(-cost_var)) as cost from cluster_costs where cost_description='TP*potencia_contratada' and cost_tariff=%s", [tariff])
         #(str(tariff))
         row = cursor.fetchall()
     return row
@@ -74,6 +88,20 @@ def power_term_cost(tariff,power):
     random_hired_power=get_hired_power_translate(power)
     ptc=cost*random_hired_power
     return ptc
+
+def get_energy_term_cost_data(tariff):
+    with connection.cursor() as cursor:
+        cursor.execute("select (cost_avg+(random()*cost_var-(-cost_var))+(-cost_var)) as cost from cluster_costs where cost_description='(TE+otros costes)*consumo' and cost_tariff=%s", [tariff])
+        #(str(tariff))
+        row = cursor.fetchall()
+    return row
+
+#Returns the "energy_term" cost
+#Params: tariff:Customer tariff; Consumption: Energy consumption in KwH
+def energy_term_cost(tariff,consumption):
+    et_unit_cost=get_power_term_cost_data(tariff)
+    etc=et_unit_cost*consumption
+    return etc
 
 def get_green_energy_cost_data():
     with connection.cursor() as cursor:
@@ -109,7 +137,9 @@ def get_battery_data(customer_type,tariff):
         row = cursor.fetchall()
     return row
 
-def batery_cost(customer_type,tariff,funding_duration):
+#Returns the "batery_cost" splitted in X months using interest
+#Params: tariff:Customer tariff ; customer_type: customer type :S; funding duration: motnhs that will pay for the service
+def battery_cost(customer_type,tariff,funding_duration):
     battery_total_price=get_battery_data(customer_type,tariff)
     batery_monthly_funding_fee=get_funding(funding_duration,battery_total_price)
     return batery_monthly_funding_fee
@@ -120,6 +150,8 @@ def get_smarthome_data(customer_type,tariff):
         row = cursor.fetchall()
     return row
 
+#Returns the "smarthome_cost" splitted in X months using interest
+#Params: tariff:Customer tariff ; customer_type: customer type :S; funding duration: motnhs that will pay for the service
 def smarthome_cost(customer_type,tariff,funding_duration):
     smarthome_total_price=get_smarthome_data(customer_type,tariff)
     smarthome_monthly_funding_fee=get_funding(funding_duration,smarthome_total_price)
@@ -132,6 +164,8 @@ def get_vehicle_data(power,tariff):
         row = cursor.fetchall()
     return row
 
+#Returns the "vehicle_cost" splitted in X months using interest
+#Params: tariff:Customer tariff ; customer_type: customer type :S; funding duration: motnhs that will pay for the service
 def vehicle_cost(power,tariff,funding_duration):
     vehicle_total_price=get_vehicle_data(power,tariff)
     vehicle_monthly_funding_fee=get_funding(funding_duration,vehicle_total_price)
@@ -144,7 +178,7 @@ def get_manager_data(tariff,customer_type):
     return row
 
 #Returns the "manager_cost" cost
-#Params: None
+#Params: tariff:Customer tariff ; customer_type: customer type :S
 def manager_cost(tariff,customer_type):
     mc=get_manager_data(tariff,customer_type)
     return mc
@@ -156,7 +190,7 @@ def get_maintenance_data(tariff,customer_type):
     return row
 
 #Returns the "maintenance_cost" cost
-#Params: None
+#Params: tariff:Customer tariff ; customer_type: customer type :S
 def maintenance_cost(tariff,customer_type):
     maintenance_c=get_maintenance_data(tariff,customer_type)
     return maintenance_c
@@ -168,16 +202,64 @@ def get_insurance_data(tariff,customer_type):
     return row
 
 #Returns the "insurance_cost" cost
-#Params: None
+#Params: tariff:Customer tariff ; customer_type: customer type :S
 def insurance_cost(tariff,customer_type):
     ic=get_insurance_data(tariff,customer_type)
     return ic
 
-#Returns the "maintenance_cost" cost
-#Params: None
-def maintenance_cost(tariff,customer_type):
-    maintenance_c=get_maintenance_data(tariff,customer_type)
-    return maintenance_c
+#Returns the "total real cost" of a product including all the services
+#Params:
+    # tariff: customer tariff, power: hired power by the customer ,consumption: monthly expected consumption
+    # customer_type: customer type :S, funding_duration: months that a fee will be charged, relates with contract term
+def total_real_cost(tariff, power,consumption,customer_type,funding_duration):
+    ptc=power_term_cost(tariff, power)
+    etc=energy_term_cost(tariff, consumption)
+    gec=green_energy_cost
+    bc=battery_cost(customer_type, tariff, funding_duration)
+    sc=smarthome_cost(customer_type, tariff, funding_duration)
+    vc=vehicle_cost(power, tariff, funding_duration)
+    bmc=manager_cost(tariff, customer_type)
+    mc=maintenance_cost(tariff, customer_type)
+    ic=insurance_cost(tariff, customer_type)
+    total_cost=ptc+etc+gec+bc+sc+vc+bmc+mc+ic
+    return total_cost
+
+#Returns the "total interest cost" of a product including all the services:
+# This cost is the real cost of a service * the interest of the customer to this service. This normalize the cost of every service
+# and allows to knows the maximum cost that a customer will have willingness to pay for all services.
+#Params:
+    # tariff: customer tariff, power: hired power by the customer ,consumption: monthly expected consumption
+    # customer_type: customer type :S, funding_duration: months that a fee will be charged, relates with contract term
+def total_interest_cost(tariff, power,consumption,customer_type,funding_duration,green_energy_interest,battery_interest,
+                        smarthome_interest,vehicle_interest,bm_interest,maintenance_interest,insurance_interest):
+    #Random interest values for each service
+    gei=get_interest_translate(green_energy_interest)
+    bi=get_interest_translate(battery_interest)
+    si=get_interest_translate(smarthome_interest)
+    vi=get_interest_translate(vehicle_interest)
+    bmi=get_interest_translate(bm_interest)
+    mi=get_interest_translate(maintenance_interest)
+    ii=get_interest_translate(insurance_interest)
+
+    #Costs equals to real
+    ptc=power_term_cost(tariff, power)
+    etc=energy_term_cost(tariff, consumption)
+
+    #Costs related with interest
+    gec=green_energy_cost
+    bc=battery_cost(customer_type, tariff, funding_duration)
+    sc=smarthome_cost(customer_type, tariff, funding_duration)
+    vc=vehicle_cost(power, tariff, funding_duration)
+    bmc=manager_cost(tariff, customer_type)
+    mc=maintenance_cost(tariff, customer_type)
+    ic=insurance_cost(tariff, customer_type)
+
+    total_real_cost=ptc+etc
+    total_interest_cost=(gec*gei)+(bc*bi)+(sc*si)+(vc*vi)+(bmc*bmi)+(mc*mi)+(ic*ii)
+
+    customer_product_value=total_real_cost+total_interest_cost
+
+    return customer_product_value
 
 # Gets a cluster and extract all properties to create a CSV report.
 def clusterStatisticsCSV(kproto):

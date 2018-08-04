@@ -82,3 +82,4 @@ class Costs(models.Model):
     deleted=models.IntegerField(default=0)
 
 
+

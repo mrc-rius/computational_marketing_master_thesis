@@ -1,0 +1,8 @@
+"Concept";"Value";"Concept description"
+"Cluster centroids";"[['153.25' 'Menor de 10 kW' 'Precio fijo anual' '3' '4']
+ ['1340.0' 'Entre 10 y 15 kW' 'Precio fijo anual' '4' '4']
+ ['367.666666667' 'Menor de 10 kW' 'Precio fijo anual' '3' '3']]";"Categories of cluster centroids"
+"Cluster computing cost";"30586.4244289";"Clustering cost, defined as the sum distance of all points to their respective cluster centroids."
+"Cluster iterations";"2";"The number of iterations the algorithm ran for"
+"Points labels";"[0 0 2 2 0 0 1 2]";"Labels of each point"
+"Gamma";"190.111973584";"The (potentially calculated) weightting factor. Gamma relates the categorical cost to the numerical cost"

@@ -15,7 +15,7 @@ class IndexView(generic.ListView):
     context_object_name = 'questions'
 
     def get_queryset(self):
-        questions = Question.objects.prefetch_related('choice_set').all().order('id')
+        questions = Question.objects.prefetch_related('choice_set').all()
         return questions
 
 class DetailView(generic.DetailView):

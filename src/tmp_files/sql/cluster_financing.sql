@@ -1,4 +1,4 @@
-
+select * from cluster_financing;
 INSERT INTO cluster_financing (financing_name, financing_monthly_interest, financing_month_duration, deleted) VALUES ('Three months',1.23,3,0);
 INSERT INTO cluster_financing (financing_name, financing_monthly_interest, financing_month_duration, deleted) VALUES ('Six months',1.65,6,0);
 INSERT INTO cluster_financing (financing_name, financing_monthly_interest, financing_month_duration, deleted) VALUES ('Nine months',1.80,9,0);

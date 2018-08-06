@@ -36,6 +36,14 @@ def get_data_to_predict():
         row = cursor.fetchall()
     return row
 
+#Get real data with a flag of training_data as FALSE: This data should be predicted
+#This is expected to run as a batch procedure every X minutes
+def get_data_to_optimize():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT  submit_id,  consumption,  power,  customer_type,  tariff,  substr(insurance,1,1) as insurance,  substr(maintenance,1,1) maintenance,  substr(battery,1,1) battery,  substr(smarthome,1,1) smarthome,  substr(vehicle,1,1) vehicle,  substr(green_energy,1,1) green_energy,  substr(business_manager,1,1) business_manager,  funding FROM crosstab($$ select form_token,question_id,answer_text from surveys_answer where question_id in (1,2,5,6,7,8,9,10,11,12,16,17) and training_set=0 order by 1,2$$) AS final_result(submit_id VARCHAR(200), consumption VARCHAR(200), power VARCHAR(200), customer_type VARCHAR(200), tariff VARCHAR(200), insurance VARCHAR(200), maintenance VARCHAR(200), battery VARCHAR(200), smarthome VARCHAR(200), vehicle VARCHAR(200), green_energy VARCHAR(200), business_manager VARCHAR(200), funding VARCHAR(200))")
+        row = cursor.fetchall()
+    return row
+
 #Inser the cluster label for each point predicted
 def insert_cluster(cluster_label,tariff,customer_type,power,consumption,product_type):
     with connection.cursor() as cursor:
@@ -85,8 +93,7 @@ def get_power_term_cost_data(tariff):
 #Params: Tariff: Electric tariff;Power: Hired power
 def power_term_cost(tariff,power):
     cost=get_power_term_cost_data(tariff)
-    random_hired_power=get_hired_power_translate(power)
-    ptc=cost*random_hired_power
+    ptc=float(cost[0][0])*float(power[0][0])
     return ptc
 
 def get_energy_term_cost_data(tariff):
@@ -100,7 +107,8 @@ def get_energy_term_cost_data(tariff):
 #Params: tariff:Customer tariff; Consumption: Energy consumption in KwH
 def energy_term_cost(tariff,consumption):
     et_unit_cost=get_power_term_cost_data(tariff)
-    etc=et_unit_cost*consumption
+    etc=float(et_unit_cost[0][0])*float(consumption)
+
     return etc
 
 def get_green_energy_cost_data():
@@ -119,7 +127,7 @@ def green_energy_cost():
 
 def get_funding_data(funding_duration):
     with connection.cursor() as cursor:
-        cursor.execute("select financing_monthly_interest from cluster_financing where financing_month_duration=%d", [funding_duration])
+        cursor.execute("select financing_monthly_interest from cluster_financing where financing_month_duration=%s",[funding_duration])
         row = cursor.fetchall()
     return row
 
@@ -127,13 +135,13 @@ def get_funding_data(funding_duration):
 #Params: funding_duration: months of the funding, value to fund
 def get_funding(funding_duration,funding_value):
     interest=get_funding_data(funding_duration)
-    total_funding_payment=funding_value*((interest/100)+1)
+    total_funding_payment=float(funding_value[0][0])*((float(interest[0][0])/float(100))+float(1))
     monthly_funding_fee=total_funding_payment/funding_duration
     return monthly_funding_fee
 
 def get_battery_data(customer_type,tariff):
     with connection.cursor() as cursor:
-        cursor.execute("select battery_price from cluster_battery where battery_customer_type=%s and battery_tariff=%s",([customer_type], [tariff]))
+        cursor.execute("select battery_price from cluster_battery where battery_customer_type=%s and battery_tariff=%s",(customer_type, tariff))
         row = cursor.fetchall()
     return row
 
@@ -141,12 +149,14 @@ def get_battery_data(customer_type,tariff):
 #Params: tariff:Customer tariff ; customer_type: customer type :S; funding duration: motnhs that will pay for the service
 def battery_cost(customer_type,tariff,funding_duration):
     battery_total_price=get_battery_data(customer_type,tariff)
+    if not battery_total_price:
+        battery_total_price=0
     batery_monthly_funding_fee=get_funding(funding_duration,battery_total_price)
     return batery_monthly_funding_fee
 
 def get_smarthome_data(customer_type,tariff):
     with connection.cursor() as cursor:
-        cursor.execute("select random()*(smarthome_max_price-smarthome_min_price) from cluster_smarthome where smarthome_customer_type=%s and smarthome_tariff=%s",([customer_type], [tariff]))
+        cursor.execute("select random()*(smarthome_max_price-smarthome_min_price) from cluster_smarthome where smarthome_customer_type=%s and smarthome_tariff=%s",(customer_type, tariff))
         row = cursor.fetchall()
     return row
 
@@ -154,26 +164,31 @@ def get_smarthome_data(customer_type,tariff):
 #Params: tariff:Customer tariff ; customer_type: customer type :S; funding duration: motnhs that will pay for the service
 def smarthome_cost(customer_type,tariff,funding_duration):
     smarthome_total_price=get_smarthome_data(customer_type,tariff)
+    if not smarthome_total_price:
+        smarthome_total_price=0.0
     smarthome_monthly_funding_fee=get_funding(funding_duration,smarthome_total_price)
     return smarthome_monthly_funding_fee
 
 
 def get_vehicle_data(power,tariff):
+    print('power:'+str(power))
+    print('tariff:' + str(tariff))
     with connection.cursor() as cursor:
-        cursor.execute("select case when %d < vehicle_min_power then 0 when %d BETWEEN  vehicle_min_power and vehicle_max_power then 1*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price when %d > vehicle_max_power then round((%d::FLOAT/vehicle_max_power::FLOAT)::INTEGER,2)*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price end from cluster_vehicle where vehicle_tariff=%s",([power], [tariff]))
+        cursor.execute("select case when %s < vehicle_min_power then 0 when %s BETWEEN  vehicle_min_power and vehicle_max_power then 1*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price when %s > vehicle_max_power then round((%s::FLOAT/vehicle_max_power::FLOAT)::INTEGER,2)*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price end from cluster_vehicle where vehicle_tariff=%s",(power,tariff))
         row = cursor.fetchall()
     return row
 
 #Returns the "vehicle_cost" splitted in X months using interest
 #Params: tariff:Customer tariff ; customer_type: customer type :S; funding duration: motnhs that will pay for the service
 def vehicle_cost(power,tariff,funding_duration):
+
     vehicle_total_price=get_vehicle_data(power,tariff)
     vehicle_monthly_funding_fee=get_funding(funding_duration,vehicle_total_price)
     return vehicle_monthly_funding_fee
 
 def get_manager_data(tariff,customer_type):
     with connection.cursor() as cursor:
-        cursor.execute("select manager_price from cluster_manager WHERE manager_tariff=%s and manager_customer_type=%s",([tariff], [customer_type]))
+        cursor.execute("select manager_price from cluster_manager WHERE manager_tariff=%s and manager_customer_type=%s",(tariff, customer_type))
         row = cursor.fetchall()
     return row
 
@@ -185,7 +200,7 @@ def manager_cost(tariff,customer_type):
 
 def get_maintenance_data(tariff,customer_type):
     with connection.cursor() as cursor:
-        cursor.execute("select maintenance_price from cluster_maintenance where maintenance_tariff=%s and maintenance_customer_type=%s",([tariff], [customer_type]))
+        cursor.execute("select maintenance_price from cluster_maintenance where maintenance_tariff=%s and maintenance_customer_type=%s",(tariff, customer_type))
         row = cursor.fetchall()
     return row
 
@@ -197,7 +212,7 @@ def maintenance_cost(tariff,customer_type):
 
 def get_insurance_data(tariff,customer_type):
     with connection.cursor() as cursor:
-        cursor.execute("select insurance_price from cluster_insurance where insurance_tariff=%s and insurance_customer_type=%s",([tariff], [customer_type]))
+        cursor.execute("select insurance_price from cluster_insurance where insurance_tariff=%s and insurance_customer_type=%s",(tariff, customer_type))
         row = cursor.fetchall()
     return row
 
@@ -241,15 +256,17 @@ def total_interest_cost(tariff, power,consumption,customer_type,funding_duration
     mi=get_interest_translate(maintenance_interest)
     ii=get_interest_translate(insurance_interest)
 
+    random_hired_power = get_hired_power_translate(power)
+    random_hired_power=str(random_hired_power[0][0])
     #Costs equals to real
-    ptc=power_term_cost(tariff, power)
+    ptc=power_term_cost(tariff, random_hired_power)
     etc=energy_term_cost(tariff, consumption)
 
     #Costs related with interest
     gec=green_energy_cost
     bc=battery_cost(customer_type, tariff, funding_duration)
     sc=smarthome_cost(customer_type, tariff, funding_duration)
-    vc=vehicle_cost(power, tariff, funding_duration)
+    vc=vehicle_cost(random_hired_power, tariff, funding_duration)
     bmc=manager_cost(tariff, customer_type)
     mc=maintenance_cost(tariff, customer_type)
     ic=insurance_cost(tariff, customer_type)
@@ -408,8 +425,38 @@ def ClusterPrediction(request):
     # Save prediction into table
     insert_predicted_data(ids_array,data_array,fit_label)
 
-    #
     return HttpResponse('Predicción de clientes pendientes realizada.')
+
+
+def ProductGeneration(request):
+    # Get data from database
+    rows = get_data_to_optimize()
+    if not rows:
+        return HttpResponse('No hay clientes para optimizar.')
+
+        # Cast as numpy Array
+    rows_array = np.array(rows)
+    # Split data into variables and id's
+    data_array = np.array(rows_array)[:, 1:]  # dejamos sólo las variables que pueden clusterizar el cliente
+    ids_array = np.array(rows_array)[:, 0]  # guardamos las id's en otro array
+
+    consumption=str(data_array[0][0])
+    power = str(data_array[0][1])
+    customer_type = str(data_array[0][2])
+    tariff = str(data_array[0][3])
+    insurance_interest = str(data_array[0][4])
+    maintenance_interest = str(data_array[0][5])
+    battery_interest = str(data_array[0][6])
+    smarthome_interest = str(data_array[0][7])
+    vehicle_interest = str(data_array[0][8])
+    green_energy_interest = str(data_array[0][9])
+    bm_interest = str(data_array[0][10])
+    funding_duration = int(str(data_array[0][11]))
+    max_cost=total_interest_cost(tariff, power, consumption, customer_type, funding_duration, green_energy_interest,battery_interest,smarthome_interest, vehicle_interest, bm_interest, maintenance_interest, insurance_interest)
+    #real_cost=total_real_cost(tariff, power, consumption, customer_type, funding_duration)
+    return HttpResponse(str(max_cost))
+
+
 
 # Function with kmodes (non-categorical) to use in further developments and to understand better clustering properties
 

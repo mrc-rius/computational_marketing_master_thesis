@@ -113,7 +113,7 @@ def energy_term_cost(tariff,consumption):
 
 def get_green_energy_cost_data():
     with connection.cursor() as cursor:
-        cursor.execute("select cost_avg from cluster_costs where cluster_costs.cost_name ='Coste energia verde'", [power])
+        cursor.execute("select cost_avg from cluster_costs where cluster_costs.cost_name ='Coste energia verde'")
         #(str(tariff))
         row = cursor.fetchall()
     return row
@@ -171,10 +171,8 @@ def smarthome_cost(customer_type,tariff,funding_duration):
 
 
 def get_vehicle_data(power,tariff):
-    print('power:'+str(power))
-    print('tariff:' + str(tariff))
     with connection.cursor() as cursor:
-        cursor.execute("select case when %s < vehicle_min_power then 0 when %s BETWEEN  vehicle_min_power and vehicle_max_power then 1*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price when %s > vehicle_max_power then round((%s::FLOAT/vehicle_max_power::FLOAT)::INTEGER,2)*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price end from cluster_vehicle where vehicle_tariff=%s",(power,tariff))
+        cursor.execute("select case when %s::float < vehicle_min_power then 0 when %s::float BETWEEN  vehicle_min_power and vehicle_max_power then 1*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price when %s::float > vehicle_max_power then round((%s::FLOAT/vehicle_max_power::FLOAT)::INTEGER,2)*random()*(vehicle_max_price-vehicle_min_price)+vehicle_min_price end from cluster_vehicle where vehicle_tariff=%s",(power,power,power,power,tariff))
         row = cursor.fetchall()
     return row
 
@@ -183,6 +181,8 @@ def get_vehicle_data(power,tariff):
 def vehicle_cost(power,tariff,funding_duration):
 
     vehicle_total_price=get_vehicle_data(power,tariff)
+    print ('Vehicle total price: '+str(vehicle_total_price))
+    print('funding_duration : ' + str(funding_duration))
     vehicle_monthly_funding_fee=get_funding(funding_duration,vehicle_total_price)
     return vehicle_monthly_funding_fee
 
@@ -227,16 +227,51 @@ def insurance_cost(tariff,customer_type):
     # tariff: customer tariff, power: hired power by the customer ,consumption: monthly expected consumption
     # customer_type: customer type :S, funding_duration: months that a fee will be charged, relates with contract term
 def total_real_cost(tariff, power,consumption,customer_type,funding_duration):
-    ptc=power_term_cost(tariff, power)
+
+    random_hired_power = get_hired_power_translate(power)
+    random_hired_power=str(random_hired_power[0][0])
+
+
+    #Costs equals to real
+    ptc=power_term_cost(tariff, random_hired_power)
     etc=energy_term_cost(tariff, consumption)
-    gec=green_energy_cost
-    bc=battery_cost(customer_type, tariff, funding_duration)
-    sc=smarthome_cost(customer_type, tariff, funding_duration)
-    vc=vehicle_cost(power, tariff, funding_duration)
-    bmc=manager_cost(tariff, customer_type)
-    mc=maintenance_cost(tariff, customer_type)
-    ic=insurance_cost(tariff, customer_type)
-    total_cost=ptc+etc+gec+bc+sc+vc+bmc+mc+ic
+
+    # Costs related with interest
+    gec = green_energy_cost()
+    bc = battery_cost(customer_type, tariff, funding_duration)
+    sc = smarthome_cost(customer_type, tariff, funding_duration)
+    vc = vehicle_cost(random_hired_power, tariff, funding_duration)
+    bmc = manager_cost(tariff, customer_type)
+    mc = maintenance_cost(tariff, customer_type)
+    ic = insurance_cost(tariff, customer_type)
+
+    total_energy_cost = ptc + etc
+    gec = gec[0][0]
+    bc = bc
+    sc = sc
+    vc = vc
+    bmc = bmc[0][0]
+    mc = mc[0][0]
+    ic = ic[0][0]
+    # green energy ok
+    print('Green energy cost:' + str(gec))
+    # Batery ok
+    print('Battery cost:' + str(bc))
+    # Batery ok
+    print('Smarthome cost:' + str(sc))
+    # Batery ok
+    print('Vehicle cost:' + str(vc))
+    # Batery ok
+    print('Business manager cost:' + str(bmc))
+    # Maintenance ok
+    print('Maintenance cost:' + str(mc))
+    # Insurance ok
+    print('Insurance cost:' + str(ic))
+
+    total_cost=float(gec)+float(bc)+float(sc)+float(vc)+float(bmc)+float(mc)+float(ic)
+
+    print('total_real_cost REAL: ' + str(total_energy_cost))
+    print('total_interest_cost REAL: ' + str(total_cost))
     return total_cost
 
 #Returns the "total interest cost" of a product including all the services:
@@ -263,7 +298,7 @@ def total_interest_cost(tariff, power,consumption,customer_type,funding_duration
     etc=energy_term_cost(tariff, consumption)
 
     #Costs related with interest
-    gec=green_energy_cost
+    gec=green_energy_cost()
     bc=battery_cost(customer_type, tariff, funding_duration)
     sc=smarthome_cost(customer_type, tariff, funding_duration)
     vc=vehicle_cost(random_hired_power, tariff, funding_duration)
@@ -271,10 +306,61 @@ def total_interest_cost(tariff, power,consumption,customer_type,funding_duration
     mc=maintenance_cost(tariff, customer_type)
     ic=insurance_cost(tariff, customer_type)
 
-    total_real_cost=ptc+etc
-    total_interest_cost=(gec*gei)+(bc*bi)+(sc*si)+(vc*vi)+(bmc*bmi)+(mc*mi)+(ic*ii)
-
-    customer_product_value=total_real_cost+total_interest_cost
+    total_energy_cost=ptc+etc
+    gec=gec[0][0]
+    gei=gei[0][0]
+    bc=bc
+    bi=bi[0][0]
+    sc=sc
+    si=si[0][0]
+    vc=vc
+    vi=vi[0][0]
+    bmc=bmc[0][0]
+    bmi=bmi[0][0]
+    mc=mc[0][0]
+    mi=mi[0][0]
+    ic=ic[0][0]
+    ii=ii[0][0]
+    '''
+    # ptc and etc cost
+    print('Power term cost:' + str(ptc))
+    print('Energy term Interest:' + str(etc))
+    #green energy ok
+    print('Green energy cost:'+str(gec))
+    print('Green energy Interest:' + str(gei))
+    print('Green energy *:' + str(float(gec)*float(gei)))
+    # Batery ok
+    print('Battery cost:' + str(bc))
+    print('Battery Interest:' + str(bi))
+    print('Battery energy *:' + str(float(bc) * float(bi)))
+    # Batery ok
+    print('Smarthome cost:' + str(sc))
+    print('Smarthome Interest:' + str(si))
+    print('Smarthome energy *:' + str(float(sc) * float(si)))
+    # Batery ok
+    print('Vehicle cost:' + str(vc))
+    print('Vehicle Interest:' + str(vi))
+    print('Vehicle energy *:' + str(float(vc) * float(vi)))
+    # Batery ok
+    print('Business manager cost:' + str(bmc))
+    print('Business manager Interest:' + str(bmi))
+    print('Business manager energy *:' + str(float(bmc) * float(bmi)))
+    # Maintenance ok
+    print('Maintenance cost:' + str(mc))
+    print('Maintenance Interest:' + str(mi))
+    print('Maintenance energy *:' + str(float(mc) * float(mi)))
+    # Insurance ok
+    print('Insurance cost:' + str(ic))
+    print('Insurance Interest:' + str(ii))
+    print('Insurance energy *:' + str(float(ic) * float(ii)))
+    total_interest_cost=(float(gec)*float(gei))+(float(bc)*float(bi))+(float(sc)*float(si))+(float(vc)*float(vi))+(float(bmc)*float(bmi))+(float(mc)*float(mi))+(float(ic)*float(ii))
+    print('total_interest_cost *:' + str(float(total_interest_cost)))
+    '''
+    #
+    total_interest_cost = (float(gec) * float(gei)) +(float(bc) * float(bi)) + (float(sc) * float(si)) + (float(vc) * float(vi)) + (float(bmc) * float(bmi)) + (float(mc) * float(mi)) + (float(ic) * float(ii))
+    print('total_real_cost VALUE: '+str(total_energy_cost))
+    print('total_interest_cost VALUE: ' + str(total_interest_cost))
+    customer_product_value=total_energy_cost+total_interest_cost
 
     return customer_product_value
 
@@ -453,7 +539,7 @@ def ProductGeneration(request):
     bm_interest = str(data_array[0][10])
     funding_duration = int(str(data_array[0][11]))
     max_cost=total_interest_cost(tariff, power, consumption, customer_type, funding_duration, green_energy_interest,battery_interest,smarthome_interest, vehicle_interest, bm_interest, maintenance_interest, insurance_interest)
-    #real_cost=total_real_cost(tariff, power, consumption, customer_type, funding_duration)
+    real_cost=total_real_cost(tariff, power, consumption, customer_type, funding_duration)
     return HttpResponse(str(max_cost))
 
 

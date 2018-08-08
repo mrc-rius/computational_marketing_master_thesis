@@ -1,0 +1,81 @@
+CREATE TABLE public.surveys_choice
+(
+    id integer DEFAULT nextval('surveys_choice_id_seq'::regclass) PRIMARY KEY NOT NULL,
+    choice_text varchar(200) NOT NULL,
+    votes integer NOT NULL,
+    question_id integer NOT NULL,
+    CONSTRAINT surveys_choice_question_id_03708b95_fk_surveys_question_id FOREIGN KEY (question_id) REFERENCES surveys_question (id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX surveys_choice_question_id_03708b95 ON public.surveys_choice (question_id);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (1, 'Menor de 10 kW', 0, 2);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (2, 'Entre 10 y 15 kW', 0, 2);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (3, 'Entre 15 y 450 kW', 0, 2);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (4, 'Mayor de 450 kW', 0, 2);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (5, 'Precio fijo anual', 0, 3);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (6, 'Precio indexado al Mercado Eléctrico', 0, 3);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (8, 'Empresa', 0, 5);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (9, 'Administración pública', 0, 5);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (10, '2.0 A', 0, 6);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (11, '2.0 DHA', 0, 6);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (12, '2.1 A', 0, 6);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (13, '2.1 DHA', 0, 6);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (14, '3.0 A', 0, 6);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (15, '3.1 A', 0, 6);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (16, '6.1 A', 0, 6);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (17, 'Otros', 0, 6);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (18, '1 (cobertura mínima)', 0, 7);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (19, '2', 0, 7);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (20, '3', 0, 7);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (21, '4', 0, 7);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (22, '5 (cobertura máxima)', 0, 7);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (23, '1 (cobertura mínima)', 0, 8);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (24, '2', 0, 8);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (25, '3', 0, 8);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (26, '4', 0, 8);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (27, '5 (cobertura máxima)', 0, 8);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (28, '1 (Me interesa muy poco)', 0, 9);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (29, '2', 0, 9);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (30, '3', 0, 9);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (31, '4', 0, 9);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (32, '5 (Muy importante)', 0, 9);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (33, '1 (Me interesa muy poco)', 0, 10);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (34, '2', 0, 10);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (35, '3', 0, 10);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (36, '4', 0, 10);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (37, '5 (Muy importante)', 0, 10);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (38, '1 (Me interesa muy poco)', 0, 11);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (39, '2', 0, 11);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (40, '3', 0, 11);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (41, '4', 0, 11);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (42, '5 (Muy importante)', 0, 11);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (43, '1 (Me interesa muy poco)', 0, 12);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (44, '2', 0, 12);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (45, '3', 0, 12);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (46, '4', 0, 12);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (47, '5 (Muy importante)', 0, 12);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (48, '1 (Muy poco importante)', 0, 13);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (49, '2', 0, 13);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (50, '3', 0, 13);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (51, '4', 0, 13);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (52, '5 (Lo más importante)', 0, 13);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (53, '1 (Muy poco importante)', 0, 14);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (54, '2', 0, 14);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (55, '3', 0, 14);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (56, '4', 0, 14);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (57, '5 (Lo más importante)', 0, 14);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (58, '1 (Me importa muy poco)', 0, 15);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (59, '2', 0, 15);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (60, '3', 0, 15);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (61, '4', 0, 15);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (62, '5 (Muy importante)', 0, 15);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (63, '1 (Me interesa muy poco)', 0, 16);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (64, '2', 0, 16);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (65, '3', 0, 16);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (66, '4', 0, 16);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (67, '5 (Me interesa mucho)', 0, 16);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (68, '0', 0, 17);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (69, '6', 0, 17);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (70, '12', 0, 17);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (71, '18', 0, 17);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (72, '24', 0, 17);
+INSERT INTO public.surveys_choice (id, choice_text, votes, question_id) VALUES (7, 'Domestico', 0, 5);

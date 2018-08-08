@@ -102,7 +102,7 @@ def get_energy_term_cost_data(tariff):
 #Returns the "energy_term" cost
 #Params: tariff:Customer tariff; Consumption: Energy consumption in KwH
 def energy_term_cost(tariff,consumption):
-    et_unit_cost=get_power_term_cost_data(tariff)
+    et_unit_cost=get_energy_term_cost_data(tariff)
     etc=float(et_unit_cost[0][0])*float(consumption)
     return etc
 
@@ -271,7 +271,6 @@ def cost(customer_form_id,tariff, power,consumption,customer_type,funding_durati
     #Electricity costs
     ptc=power_term_cost(tariff, random_hired_power)
     etc=energy_term_cost(tariff, consumption)
-
     # Real costs
     gec = green_energy_cost()
     bc = battery_cost(customer_type, tariff, funding_duration)

@@ -1,0 +1,6 @@
+"Solution cost";"Subservices included"
+"78,914";"{'interest_bm_cost': 0.27160253907814635, 'interest_green_energy_cost': 0.5065284639761314, 'interest_smarthome_cost': 77.84570039209996, 'insurance_maintenance_cost': 0.2898647840367625}"
+"83,819";"{'interest_bm_cost': 0.27160253907814635, 'interest_green_energy_cost': 0.5065284639761314, 'interest_vehicle_cost': 82.75062570681827, 'insurance_maintenance_cost': 0.2898647840367625}"
+"161,158";"{'interest_bm_cost': 0.27160253907814635, 'interest_vehicle_cost': 82.75062570681827, 'interest_smarthome_cost': 77.84570039209996, 'insurance_maintenance_cost': 0.2898647840367625}"
+"161,374";"{'interest_bm_cost': 0.27160253907814635, 'interest_green_energy_cost': 0.5065284639761314, 'interest_vehicle_cost': 82.75062570681827, 'interest_smarthome_cost': 77.84570039209996}"
+"161,393";"{'interest_green_energy_cost': 0.5065284639761314, 'interest_vehicle_cost': 82.75062570681827, 'interest_smarthome_cost': 77.84570039209996, 'insurance_maintenance_cost': 0.2898647840367625}"

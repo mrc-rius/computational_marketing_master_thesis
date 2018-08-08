@@ -222,7 +222,7 @@ def insurance_cost(tariff,customer_type):
     return ic
 
 
-##Returns the
+##Returns a nested dict of feasible subservices combinations sorted by total combination price
 #Params:
     # interest_X_cost: Parameters with the maximum value a customer is willing to pay. Is directly a relation of value(interest)*weight(real cost)
     # total_interest_cost: maximum price to pay for each customer (adapted to willingness). Is equivalent to knapsack capacity
@@ -237,35 +237,26 @@ def knapsack_algorithm(interest_green_energy_cost,interest_battery_cost,interest
         'interest_maintenance_cost':interest_maintenance_cost,
         'insurance_maintenance_cost':insurance_maintenance_cost
     }
-    #print (' -----------------------------------------------------------------------original -----------------------------------------------------------------------')
-    #print(str(subservices_dict))
     all_services_combination = {}
     for item in itertools.permutations(subservices_dict.items()):
-        #print(' -----------------------------------------------------------------------iterations -----------------------------------------------------------------------')
-        #print(collections.OrderedDict(item))
-        #print(' ----------------------------------------------------------------------------------------------------------------------------------------------')
         maximum_cost=float(total_interest_cost)
         current_cost=float(0)
         current_services={}
         for subservice_name,subservice_value in collections.OrderedDict(item).items():
-            #print('current_cost'+str(current_cost))
-            #print('maximum_cost'+str(maximum_cost))
             if(float(subservice_value)!=float(0)):
                 new_cost=current_cost + subservice_value
                 if new_cost<maximum_cost:
                     current_cost = new_cost
                     current_services[subservice_name] = subservice_value
                 else:
-                    print('Maximum cost superado') #esto seria guya meterlo en dict de salida de combinatorias que sobrepasan valor maximo
-        #nested dict, the key of the main dict is the total cost of the current services of the sub dict
-        #creo que repite combinaciones
-        all_services_combination[current_cost] = current_services
-        print(' ----------------------------------------------------------------------------------------------------------------------------------------------')
-        print(str(all_services_combination))
-        print(' ----------------------------------------------------------------------------------------------------------------------------------------------')
+                    #Save services combination in results dict because with a new service added the maximum cost is exceeded
+                    all_services_combination[current_cost] = current_services #nested dict, the key of the main dict is the total cost of the current services of the sub dict
 
-
-    return 1
+    sorted_solution=sorted(all_services_combination)
+    print('At knapsack')
+    for key in sorted(all_services_combination):
+        print("%s: %s" % (key, all_services_combination[key]))
+    return sorted_solution
 
 #Returns the "total real & interest cost" of a product including all the services
 #Params:
@@ -329,9 +320,10 @@ def cost(tariff, power,consumption,customer_type,funding_duration,green_energy_i
     total_real_cost=float(gec)+float(bc)+float(sc)+float(vc)+float(bmc)+float(mc)+float(ic)
     total_interest_cost = interest_green_energy_cost + interest_battery_cost + interest_smarthome_cost + interest_vehicle_cost + interest_bm_cost + interest_maintenance_cost + insurance_maintenance_cost
 
-    #knapsack algorithm
-    knapsack_algorithm(interest_green_energy_cost,interest_battery_cost,interest_smarthome_cost,interest_vehicle_cost,interest_bm_cost,interest_maintenance_cost,insurance_maintenance_cost,total_interest_cost)
-
+    #knapsack algorithm with customer data
+    solution_customer=knapsack_algorithm(interest_green_energy_cost,interest_battery_cost,interest_smarthome_cost,interest_vehicle_cost,interest_bm_cost,interest_maintenance_cost,insurance_maintenance_cost,total_interest_cost)
+    print('At costs' + str(solution_customer))
+    solutionToCSV(solution_customer, 0)
 
     '''
     
@@ -441,19 +433,6 @@ def clusterStatisticsCSV(kproto):
     customer_type = cluster_centroids[1][2][2],
     tariff = cluster_centroids[1][2][3]
     insert_cluster(cluster_label, tariff, customer_type, power, consumption, product_type)
-
-        #np.array([
-                #  np.array([
-    #                       cluster_centroids[0][0][0],
-    #                       cluster_centroids[1][0][0],
-    #                       cluster_centroids[0][0][1]
-    #             ])
-    #               ,np.array([
-    #                       cluster_centroids[0][1][0],
-    #                       cluster_centroids[1][1][0],
-    #                        cluster_centroids[0][1][1]
-    #                       ])
-    #            ])
     path = './tmp_files/cluster_results/'
     filename=datetime.datetime.now().strftime('%Y%m%d_%H%M%S')+'_kprototype_cluster_results.csv'
     with open(path+filename, 'w') as csvfile:
@@ -464,6 +443,23 @@ def clusterStatisticsCSV(kproto):
         filewriter.writerow(['Cluster iterations', kproto.n_iter_,'The number of iterations the algorithm ran for'])
         filewriter.writerow(['Points labels', kproto.labels_, 'Labels of each point'])
         filewriter.writerow(['Gamma', kproto.gamma, 'The (potentially calculated) weightting factor. Gamma relates the categorical cost to the numerical cost'])
+
+#Creates a csv as output of feasible solutions
+#Params: Solution: Python nested dictionary with all feasible product combination sorted by total price of each combination
+        #origin: Param that tell us how algorithm has been run-->origin=0 means algorithm with customer data; otherwise means algorithm with cluster data
+def solutionToCSV(solution,origin):
+    print('Array' + str(solution))
+    path = './tmp_files/knapsack_results/'
+    if origin==0:
+        filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + '_knapsack_customer_data_results.csv'
+    else:
+        filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + '_knapsack_cluster_data_results.csv'
+    with open(path + filename, 'w') as csvfile:
+        for key,value in solution:
+            print('Array'+str(value))
+            filewriter = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
+            filewriter.writerow(['Solution cost', 'Subservices included'])
+            filewriter.writerow([str(key), str(solution[key])])
 
 # This function creates kprototype clusters using the current data at database
 def ClusterCreation(request,*args):

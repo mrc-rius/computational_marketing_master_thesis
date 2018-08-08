@@ -1,0 +1,1 @@
+#This directory contains csv reports about KANPSACK results statistics.

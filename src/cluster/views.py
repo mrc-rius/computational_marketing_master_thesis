@@ -15,13 +15,16 @@ import collections
 # Global variables
 kproto = 0 # variable with the cluster object if it has been computed
 
-
+#Get cluster data for specific customer
+def get_cluster_data():
+    with connection.cursor() as cursor:
+        cursor.execute("select cp.form_id,cc.consumption,cc.power from cluster_prediction cp inner join cluster_centroids cc on cp.cluster_label=cc.cluster_label where cc.cluster_date::date=(select max(cluster_date::date) from cluster_centroids)")
+        row = cursor.fetchall()
+    return row
 
 #Get real data with a flag of training_data as TRUE: This data is useful to set the clusters
 def get_training_data():
     with connection.cursor() as cursor:
-        #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
-        #cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where training_set=1 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
         cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where question_id in (1,2,3,5,6) and training_set=1 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question5 varchar(200),question6 varchar(200))")
         row = cursor.fetchall()
     return row
@@ -31,8 +34,6 @@ def get_training_data():
 #This is expected to run as a batch procedure every X minutes
 def get_data_to_predict():
     with connection.cursor() as cursor:
-        #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
-        #cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where training_set=0 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question4 varchar(200),question5 varchar(200),question6 varchar(200),question7 varchar(200),question8 varchar(200),question9 varchar(200),question10 varchar(200),question11 varchar(200),question12 varchar(200),question13 varchar(200),question14 varchar(200),question15 varchar(200),question16 varchar(200),question17 varchar(200),question18 varchar(200),question19 varchar(200),question20 varchar(200),question21 varchar(200),question22 varchar(200),question23 varchar(200),question24 varchar(200),question25 varchar(200),question26 varchar(200),question27 varchar(200))")
         cursor.execute("SELECT * FROM crosstab ($$ select form_token,question_id,answer_text from surveys_answer where question_id in (1,2,3,5,6) and training_set=0 order by 1,2$$) AS final_result(submit_id varchar(200),question1 varchar(200),question2 varchar(200),question3 varchar(200),question5 varchar(200),question6 varchar(200))")
         row = cursor.fetchall()
     return row
@@ -48,7 +49,6 @@ def get_data_to_optimize():
 #Inser the cluster label for each point predicted
 def insert_cluster(cluster_label,tariff,customer_type,power,consumption,product_type):
     with connection.cursor() as cursor:
-        #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
         cursor.execute("INSERT INTO cluster_centroids(cluster_label,tariff,customer_type,power,consumption,product_type,cluster_date) VALUES(%s,%s,%s,%s,%s,%s,%s)",(cluster_label,tariff,customer_type,power,consumption,product_type,datetime.datetime.now()))
     return 1;
 
@@ -57,7 +57,6 @@ def insert_predicted_data(ids_array,data_array,fit_label):
     loop_counter=0
     for id in ids_array:
         with connection.cursor() as cursor:
-            #cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
             cursor.execute("INSERT INTO cluster_prediction(form_id,prediction_date,cluster_label) VALUES(%s,%s,%s)",(id,datetime.datetime.now(),int(fit_label[loop_counter])))
             loop_counter+=1
     return 1;
@@ -68,7 +67,6 @@ def insert_predicted_data(ids_array,data_array,fit_label):
 def get_hired_power_translate(power):
     with connection.cursor() as cursor:
         cursor.execute("select random()*(max_hired_power-min_hired_power)+min_hired_power as random_hired_power from surveys_Translate_Hired_Power where hired_power_literal=%s", [power])
-        #(str(tariff))
         row = cursor.fetchall()
     return row
 
@@ -79,14 +77,12 @@ def get_hired_power_translate(power):
 def get_interest_translate(interest):
     with connection.cursor() as cursor:
         cursor.execute("select random()*(max_interest-min_interest)+min_interest as rand_interest from surveys_Translate_Interest where interest_value=%s", [interest])
-        #(str(tariff))
         row = cursor.fetchall()
     return row
 
 def get_power_term_cost_data(tariff):
     with connection.cursor() as cursor:
         cursor.execute("select (cost_avg+(random()*cost_var-(-cost_var))+(-cost_var)) as cost from cluster_costs where cost_description='TP*potencia_contratada' and cost_tariff=%s", [tariff])
-        #(str(tariff))
         row = cursor.fetchall()
     return row
 
@@ -100,7 +96,6 @@ def power_term_cost(tariff,power):
 def get_energy_term_cost_data(tariff):
     with connection.cursor() as cursor:
         cursor.execute("select (cost_avg+(random()*cost_var-(-cost_var))+(-cost_var)) as cost from cluster_costs where cost_description='(TE+otros costes)*consumo' and cost_tariff=%s", [tariff])
-        #(str(tariff))
         row = cursor.fetchall()
     return row
 
@@ -109,13 +104,11 @@ def get_energy_term_cost_data(tariff):
 def energy_term_cost(tariff,consumption):
     et_unit_cost=get_power_term_cost_data(tariff)
     etc=float(et_unit_cost[0][0])*float(consumption)
-
     return etc
 
 def get_green_energy_cost_data():
     with connection.cursor() as cursor:
         cursor.execute("select cost_avg from cluster_costs where cluster_costs.cost_name ='Coste energia verde'")
-        #(str(tariff))
         row = cursor.fetchall()
     return row
 
@@ -261,8 +254,8 @@ def knapsack_algorithm(interest_green_energy_cost,interest_battery_cost,interest
 #Params:
     # tariff: customer tariff, power: hired power by the customer ,consumption: monthly expected consumption
     # customer_type: customer type :S, funding_duration: months that a fee will be charged, relates with contract term
-def cost(tariff, power,consumption,customer_type,funding_duration,green_energy_interest,battery_interest,
-                        smarthome_interest,vehicle_interest,bm_interest,maintenance_interest,insurance_interest):
+def cost(customer_form_id,tariff, power,consumption,customer_type,funding_duration,green_energy_interest,battery_interest,
+                        smarthome_interest,vehicle_interest,bm_interest,maintenance_interest,insurance_interest,customer_or_cluster):
     # Random interest values for each service
     gei = get_interest_translate(green_energy_interest)
     bi = get_interest_translate(battery_interest)
@@ -271,7 +264,6 @@ def cost(tariff, power,consumption,customer_type,funding_duration,green_energy_i
     bmi = get_interest_translate(bm_interest)
     mi = get_interest_translate(maintenance_interest)
     ii = get_interest_translate(insurance_interest)
-
     #Translate literal power to value
     random_hired_power = get_hired_power_translate(power)
     random_hired_power=str(random_hired_power[0][0])
@@ -321,61 +313,15 @@ def cost(tariff, power,consumption,customer_type,funding_duration,green_energy_i
 
     #knapsack algorithm with customer data
     solution_customer=knapsack_algorithm(interest_green_energy_cost,interest_battery_cost,interest_smarthome_cost,interest_vehicle_cost,interest_bm_cost,interest_maintenance_cost,insurance_maintenance_cost,total_interest_cost)
-    solutionToCSV(solution_customer, 0)
+    solutionToCSV(customer_form_id,total_real_cost,total_interest_cost,total_energy_cost,solution_customer, customer_or_cluster,
+                  tariff, power, consumption, customer_type, funding_duration, green_energy_interest, battery_interest,
+                  smarthome_interest, vehicle_interest, bm_interest, maintenance_interest, insurance_interest)
 
-    '''
-    
-        print('------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
-    print('interest_green_energy_cost SHARED: ' + str(interest_green_energy_cost))
-    print('interest_battery_cost SHARED: ' + str(interest_battery_cost))
-    print('interest_smarthome_cost SHARED: ' + str(interest_smarthome_cost))
-    print('interest_vehicle_cost SHARED: ' + str(interest_vehicle_cost))
-    print('interest_bm_cost SHARED: ' + str(interest_bm_cost))
-    print('interest_maintenance_cost SHARED: ' + str(interest_maintenance_cost))
-    print('insurance_maintenance_cost SHARED: ' + str(insurance_maintenance_cost))
-    print('------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
-    print('total_real_cost SHARED: ' + str(total_energy_cost))
-    print('total_interest_cost REAL: ' + str(total_real_cost))
-    print('total_interest_cost INTEREST: ' + str(total_interest_cost))
-    print('------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
-
-
-
-
-        # ptc and etc cost
-        print('Power term cost:' + str(ptc))
-        print('Energy term Interest:' + str(etc))
-        #green energy ok
-        print('Green energy cost:'+str(gec))
-        print('Green energy Interest:' + str(gei))
-        print('Green energy *:' + str(float(gec)*float(gei)))
-        # Batery ok
-        print('Battery cost:' + str(bc))
-        print('Battery Interest:' + str(bi))
-        print('Battery energy *:' + str(float(bc) * float(bi)))
-        # Batery ok
-        print('Smarthome cost:' + str(sc))
-        print('Smarthome Interest:' + str(si))
-        print('Smarthome energy *:' + str(float(sc) * float(si)))
-        # Batery ok
-        print('Vehicle cost:' + str(vc))
-        print('Vehicle Interest:' + str(vi))
-        print('Vehicle energy *:' + str(float(vc) * float(vi)))
-        # Batery ok
-        print('Business manager cost:' + str(bmc))
-        print('Business manager Interest:' + str(bmi))
-        print('Business manager energy *:' + str(float(bmc) * float(bmi)))
-        # Maintenance ok
-        print('Maintenance cost:' + str(mc))
-        print('Maintenance Interest:' + str(mi))
-        print('Maintenance energy *:' + str(float(mc) * float(mi)))
-        # Insurance ok
-        print('Insurance cost:' + str(ic))
-        print('Insurance Interest:' + str(ii))
-        print('Insurance energy *:' + str(float(ic) * float(ii)))
-        total_interest_cost=(float(gec)*float(gei))+(float(bc)*float(bi))+(float(sc)*float(si))+(float(vc)*float(vi))+(float(bmc)*float(bmi))+(float(mc)*float(mi))+(float(ic)*float(ii))
-        print('total_interest_cost *:' + str(float(total_interest_cost)))
-        '''
+    # knapsack algorithm with customer data
+    solution_customer = knapsack_algorithm(interest_green_energy_cost, interest_battery_cost, interest_smarthome_cost,interest_vehicle_cost, interest_bm_cost, interest_maintenance_cost,insurance_maintenance_cost, total_interest_cost)
+    solutionToCSV(customer_form_id,total_real_cost,total_interest_cost,total_energy_cost,solution_customer, customer_or_cluster,
+                  tariff, power, consumption, customer_type, funding_duration, green_energy_interest, battery_interest,
+                  smarthome_interest, vehicle_interest, bm_interest, maintenance_interest, insurance_interest)
 
     return 1
 
@@ -416,7 +362,7 @@ def clusterStatisticsCSV(kproto):
     tariff = cluster_centroids[1][0][3]
     insert_cluster(cluster_label, tariff, customer_type, power, consumption, product_type)
     # Save cluster 2, A.K.A product 2
-    cluster_label = 0
+    cluster_label = 1
     consumption = int(cluster_centroids[0][1][0])
     power = cluster_centroids[1][1][0],
     product_type = cluster_centroids[1][1][1]
@@ -424,7 +370,7 @@ def clusterStatisticsCSV(kproto):
     tariff = cluster_centroids[1][1][3]
     insert_cluster(cluster_label, tariff, customer_type, power, consumption, product_type)
     # Save cluster 3, A.K.A product 3
-    cluster_label = 0
+    cluster_label = 2
     consumption = int(cluster_centroids[0][2][0])
     power = cluster_centroids[1][2][0],
     product_type = cluster_centroids[1][2][1]
@@ -445,8 +391,9 @@ def clusterStatisticsCSV(kproto):
 #Creates a csv as output of feasible solutions
 #Params: Solution: Python nested dictionary with all feasible product combination sorted by total price of each combination
         #origin: Param that tell us how algorithm has been run-->origin=0 means algorithm with customer data; otherwise means algorithm with cluster data
-def solutionToCSV(solution,origin):
-    print('Array' + str(solution))
+def solutionToCSV(customer_form_id,total_real_cost,total_interest_cost,total_energy_cost,solution,origin,
+                  tariff, power, consumption, customer_type, funding_duration, green_energy_interest, battery_interest,
+                  smarthome_interest, vehicle_interest, bm_interest, maintenance_interest, insurance_interest):
     path = './tmp_files/knapsack_results/'
     if origin==0:
         filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + '_knapsack_customer_data_results.csv'
@@ -454,9 +401,25 @@ def solutionToCSV(solution,origin):
         filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + '_knapsack_cluster_data_results.csv'
     with open(path + filename, 'w') as csvfile:
         filewriter = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
-        filewriter.writerow(['Solution cost', 'Subservices included'])
+        filewriter.writerow(['Solution cost', 'Subservices included','Description'])
+        filewriter.writerow([str(customer_form_id), 'Cusomer form id', 'Product for customer with this id'])
+        filewriter.writerow([str(tariff), 'Tariff', 'Tariff parameter'])
+        filewriter.writerow([str(power), 'Power', 'Power parameter'])
+        filewriter.writerow([str(consumption), 'Consumption', 'Consumption parameter'])
+        filewriter.writerow([str(customer_type), 'Customer type', 'Customer type parameter'])
+        filewriter.writerow([str(funding_duration), 'Funding duration', 'Funding duration parameter'])
+        filewriter.writerow([str(green_energy_interest), 'Green energy interest', 'Green energy_interest parameter'])
+        filewriter.writerow([str(battery_interest), 'Battery interest', 'battery interest parameter'])
+        filewriter.writerow([str(smarthome_interest), 'Smarthome interest', 'Smarthome interest parameter'])
+        filewriter.writerow([str(vehicle_interest), 'Vehicle interest', 'Vehicle interest parameter'])
+        filewriter.writerow([str(bm_interest), 'Business manager interest', 'Business manager interest parameter'])
+        filewriter.writerow([str(maintenance_interest), 'Maintenance interest', 'Maintenance interest parameter'])
+        filewriter.writerow([str(insurance_interest), 'Insurance interest','Insurance interest parameter'])
+        filewriter.writerow([str(round(total_real_cost, 3)).replace(".", ","), 'All subservices','Cost of the product with all the subservices included without considering interest (real value)'])
+        filewriter.writerow([str(round(total_interest_cost, 3)).replace(".", ","), 'All subservices with interest normalization','Cost of the product with all the subservices included but normalizing price with interest (maximum value for the customer)'])
+        filewriter.writerow([str(round(total_energy_cost, 3)).replace(".", ","), 'Energy supply','Main cost: energy supply (monthly)'])
         for key in sorted(solution):
-            filewriter.writerow([str(round(key,3)).replace(".",","), str(solution[key])])
+            filewriter.writerow([str(round(key,3)).replace(".",","), str(solution[key]),'Subservice feasible combination (monthly)'])
 
 # This function creates kprototype clusters using the current data at database
 def ClusterCreation(request,*args):
@@ -526,6 +489,7 @@ def ClusterPrediction(request):
     '''
     #Cluster prediction
     #fit_label = kproto.predict(data_array,categorical=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26])  # categorical is the Index of columns that contain categorical data
+    print('clustering array')
     fit_label = kproto.predict(data_array,categorical=[1, 2, 3, 4])  # categorical is the Index of columns that contain categorical data
     # Save prediction into table
     insert_predicted_data(ids_array,data_array,fit_label)
@@ -535,16 +499,17 @@ def ClusterPrediction(request):
 
 def ProductGeneration(request):
     # Get data from database
-    rows = get_data_to_optimize()
-    if not rows:
+    customer_rows = get_data_to_optimize()
+    if not customer_rows:
         return HttpResponse('No hay clientes para optimizar.')
 
-        # Cast as numpy Array
-    rows_array = np.array(rows)
+    # Cast as numpy Array
+    rows_array = np.array(customer_rows)
     # Split data into variables and id's
     data_array = np.array(rows_array)[:, 1:]  # dejamos sólo las variables que pueden clusterizar el cliente
     ids_array = np.array(rows_array)[:, 0]  # guardamos las id's en otro array
 
+    customer_form_id = str(ids_array[0])
     consumption=str(data_array[0][0])
     power = str(data_array[0][1])
     customer_type = str(data_array[0][2])
@@ -557,14 +522,32 @@ def ProductGeneration(request):
     green_energy_interest = str(data_array[0][9])
     bm_interest = str(data_array[0][10])
     funding_duration = int(str(data_array[0][11]))
-    max_cost=cost(tariff, power, consumption, customer_type, funding_duration, green_energy_interest,battery_interest,smarthome_interest, vehicle_interest, bm_interest, maintenance_interest, insurance_interest)
+    # knapsack algorithm with customer data
+    customer_or_cluster = 0 #0 means customer data
+    response_customer=cost(customer_form_id,tariff, power, consumption, customer_type, funding_duration, green_energy_interest,battery_interest,smarthome_interest, vehicle_interest, bm_interest, maintenance_interest, insurance_interest,customer_or_cluster)
 
-    return HttpResponse(str(max_cost))
 
+    #get cluster data
+    cluster_rows = get_cluster_data()
+    # Cast as numpy Array
+    cluster_rows_array = np.array(cluster_rows)
+    # Split data into variables and id's
+    cluster_data_array = np.array(cluster_rows_array)[:, 1:]  # dejamos sólo las variables que pueden clusterizar el cliente
+    cluster_ids_array = np.array(cluster_rows_array)[:, 0]  # guardamos las id's en otro array
+    customer_form_id=str(cluster_ids_array[0])
+    cluster_consumption = str(cluster_data_array[0][0])
+    cluster_power = str(cluster_data_array[0][1])
+    # knapsack algorithm with cluster data
+    customer_or_cluster = 1  # 1 means cluster data
+    response_cluster = cost(customer_form_id,tariff, cluster_power, cluster_consumption, customer_type, funding_duration, green_energy_interest, battery_interest, smarthome_interest, vehicle_interest, bm_interest, maintenance_interest,insurance_interest,customer_or_cluster)
 
+    #response
+    if (response_cluster==1 and response_customer==1):
+        return HttpResponse(str(1))
+    else:
+        return HttpResponse(str(0))
 
 # Function with kmodes (non-categorical) to use in further developments and to understand better clustering properties
-
 def clusterCreationKmode():
     # random categorical data
     data = np.random.choice(20, (100, 10))

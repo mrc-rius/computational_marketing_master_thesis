@@ -394,6 +394,10 @@ def solutionToCSV(customer_form_id,total_real_cost,total_interest_cost,total_ene
                   tariff, power, consumption, customer_type, funding_duration, green_energy_interest, battery_interest,
                   smarthome_interest, vehicle_interest, bm_interest, maintenance_interest, insurance_interest):
     path = './tmp_files/knapsack_results/'
+    expensive_solution=max(solution)
+    cheapest_solution = min(solution)
+    best_ratio_solution=None # solution cost/number of elements in feasibel solution (smaller value best ratio)
+    best_ratio_key=None
     if origin==0:
         filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + '_knapsack_customer_data_results.csv'
     else:
@@ -419,6 +423,14 @@ def solutionToCSV(customer_form_id,total_real_cost,total_interest_cost,total_ene
         filewriter.writerow([str(round(total_energy_cost, 3)).replace(".", ","), 'Energy supply','Main cost: energy supply (monthly)'])
         for key in sorted(solution):
             filewriter.writerow([str(round(key,3)).replace(".",","), str(solution[key]),'Subservice feasible combination (monthly)'])
+            current_ratio_solution=float(round(key,3))/float(len(solution[key]))
+            if (best_ratio_solution is None or best_ratio_solution>current_ratio_solution):
+                best_ratio_solution=current_ratio_solution
+                best_ratio_key=key
+
+        filewriter.writerow([str(round(cheapest_solution, 3)).replace(".", ","), str(solution[cheapest_solution]),'Cheapest solution (supposed the best option for customer)'])
+        filewriter.writerow([str(round(expensive_solution, 3)).replace(".", ","), str(solution[expensive_solution]),'Expensive solution (supposed the best option for enterprise)'])
+        filewriter.writerow([str(round(best_ratio_key, 3)).replace(".", ","), str(solution[best_ratio_key]), 'Best solution considering ratio between price and number of services'])
 
 # This function creates kprototype clusters using the current data at database
 def ClusterCreation(request,*args):

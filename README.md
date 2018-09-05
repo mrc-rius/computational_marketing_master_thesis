@@ -25,11 +25,11 @@ It take in account the customer preferences, and customer type to performs a goo
 
 <h2>Built with</h2>
 
-  Python
-  Django
-  PostgreSQL
-  Nginx
-  Docker 
+1. Python
+2. Django
+3. PostgreSQL
+4. Nginx
+5. Docker 
 
 <h1>Authors</h1>
 

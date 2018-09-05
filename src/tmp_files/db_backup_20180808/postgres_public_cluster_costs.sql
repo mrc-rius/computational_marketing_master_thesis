@@ -1,0 +1,47 @@
+CREATE TABLE public.cluster_costs
+(
+    id integer DEFAULT nextval('cluster_costs_id_seq'::regclass) PRIMARY KEY NOT NULL,
+    cost_name varchar(200) NOT NULL,
+    cost_description varchar(200) NOT NULL,
+    cost_unit varchar(200) NOT NULL,
+    cost_avg numeric(10,2) NOT NULL,
+    cost_dsv numeric(10,2) NOT NULL,
+    cost_var numeric(10,2) NOT NULL,
+    deleted integer NOT NULL,
+    cost_tariff varchar(10)
+);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (1, 'Coste OMIE red electrica', 'Coste aplicado por OMIE por la infraestructura eléctrica', '€/kWh', 0.00, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (2, 'Coste pool energia', 'Coste electricidad', '€/kWh', 0.06, 0.01, 0.07, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (3, 'Coste desviacion inferior', 'Coste aplicado a la comercializadora por comprar por debajo de lo que consume', '€/kWh', 3.16, 1.96, 748.26, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (4, 'Coste desviacion superior', 'Coste aplicado a la comercializadora por comprar por encima de lo que consume', '€/kWh', 2.35, 1.84, 134.54, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (5, 'Coste puro diario', 'Cose básico del kWh', '€/kWh', 62.12, 1.12, 53.98, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (6, 'Coste garantia potencia 2.0 A', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 4.63, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (7, 'Coste garantia potencia 2.0 DHA', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 2.46, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (8, 'Coste garantia potencia 2.0 DHS', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 2.51, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (9, 'Coste garantia potencia 2.1 A', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 4.63, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (10, 'Coste garantia potencia 2.1 DHA', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 2.46, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (11, 'Coste garantia potencia 2.1 DHS', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 2.51, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (12, 'Coste garantia potencia 3.0 A', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 3.57, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (13, 'Coste garantia potencia 3.1 A', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 2.45, 0.43, 3.11, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (14, 'Coste garantia potencia X', 'Coste aplicado a la potenica de la tarifa en cuestión', '€/kWh', 2.27, 1.17, 1.38, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (35, 'Coste energia verde', 'Por factura', 'mes', 0.83, 0.00, 0.00, 0, null);
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (25, 'Coste tarifa acceso 2.0 A - termino potencia', 'TP*potencia_contratada', '€/kWh', 3.17, 0.00, 0.00, 0, '2.0 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (26, 'Coste tarifa acceso 2.0 DHA - termino potencia', 'TP*potencia_contratada', '€/kWh', 3.17, 0.00, 0.00, 0, '2.0 DHA');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (27, 'Coste tarifa acceso 2.0 DHS - termino potencia', 'TP*potencia_contratada', '€/kWh', 3.17, 0.00, 0.00, 0, '2.0 DHS');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (28, 'Coste tarifa acceso 2.1 A - termino potencia', 'TP*potencia_contratada', '€/kWh', 3.70, 0.00, 0.00, 0, '2.1 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (29, 'Coste tarifa acceso 2.1 DHA - termino potencia', 'TP*potencia_contratada', '€/kWh', 3.70, 0.00, 0.00, 0, '2.1 DHA');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (30, 'Coste tarifa acceso 2.1 DHS - termino potencia', 'TP*potencia_contratada', '€/kWh', 3.70, 0.00, 0.00, 0, '2.1 DHS');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (31, 'Coste tarifa acceso 3.0 A - termino potencia', 'TP*potencia_contratada', '€/kWh', 6.79, 0.00, 0.00, 0, '3.0 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (32, 'Coste tarifa acceso 3.1 A - termino potencia', 'TP*potencia_contratada', '€/kWh', 8.67, 0.00, 0.00, 0, '3.1 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (33, 'Coste tarifa acceso 6.1 A - termino potencia', 'TP*potencia_contratada', '€/kWh', 9.02, 0.00, 0.00, 0, '6.1 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (34, 'Coste tarifa acceso X - termino potencia', 'TP*potencia_contratada', '€/kWh', 7.15, 0.00, 0.00, 0, 'X');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (15, 'Coste tarifa acceso 2.0 A - termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.04, 0.00, 0.00, 0, '2.0 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (16, 'Coste tarifa acceso 2.0 DHA - termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.06, 0.00, 0.00, 0, '2.0 DHA');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (17, 'Coste tarifa acceso 2.0 DHS - termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.07, 0.00, 0.00, 0, '2.0 DHS');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (18, 'Coste tarifa acceso 2.1 A - termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.06, 0.00, 0.00, 0, '2.1 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (19, 'Coste tarifa acceso 2.1 DHA - termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.09, 0.00, 0.00, 0, '2.1 DHA');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (20, 'Coste tarifa acceso 2.1 DHS - termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.10, 0.00, 0.00, 0, '2.1 DHS');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (21, 'Coste tarifa acceso 3.0 A- termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.03, 0.00, 0.00, 0, '3.0 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (22, 'Coste tarifa acceso 3.1 A - termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.03, 0.00, 0.00, 0, '3.1 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (23, 'Coste tarifa acceso 6.1 A- termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.07, 0.00, 0.00, 0, '6.1 A');
+INSERT INTO public.cluster_costs (id, cost_name, cost_description, cost_unit, cost_avg, cost_dsv, cost_var, deleted, cost_tariff) VALUES (24, 'Coste tarifa acceso X - termino energia', '(TE+otros costes)*consumo', '€/kWh', 0.06, 0.00, 0.00, 0, 'X');

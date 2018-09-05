@@ -1,0 +1,36 @@
+1  -- consumo
+2 -- potencia
+3 -- tipo producto
+4 -- cp
+5 -- tipo cliente
+6 -- tarifa
+7 -- seguro
+8 -- mantenimiento
+9 -- baterias
+10 -- smarthome
+11 --carga rapida
+12 -- energia verde
+13 -- precio
+14 --notificaciones
+15 -- permanencia?
+16 -- bm
+17 -- financiacion
+
+
+
+
+----- para el algoritmo
+
+6 -- tarifa
+2 -- potencia
+1  -- consumo
+5 -- tipo cliente
+17 -- financiacion
+12 -- energia verde
+9 -- baterias
+10 -- smarthome
+11 --carga rapida (vehiculo)
+16 -- bm
+8 -- mantenimiento
+7 -- seguro
+
